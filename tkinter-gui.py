@@ -5,15 +5,6 @@ from tkinter import messagebox
 import requests, json
 import time
 from datetime import datetime
-import blpapi
-
-
-def test_news():
-    type = 'sports'
-    apiKey = '0aa18f0aee7a40d18225c0ed63656d68'
-    BASE_URL = f'http://newsapi.org/v2/top-headlines?country=in&category={type}&apiKey='+apiKey
-
-
 
 
 class Mirror_GUI():
@@ -27,20 +18,19 @@ class Mirror_GUI():
         self.largeFont = font.Font(family="Times New Roman CE", size=70)
         self.mediumFont = font.Font(family="Times New Roman CE", size=40)
         self.normalFont = font.Font(family="Times New Roman CE", size=20)
+        self.mirror_gui.grid_propagate(False)
 
     def base_GUI(self):
-
         # Weather frame
-
         # Time
-        self.weather_frame = Frame(self.mirror_gui, borderwidth=5, relief="ridge", width=400,
+        self.weather_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=400,
                                    height=200, bg='black', highlightbackground="gray")
 
         # Weather
         self.label_time = Label(self.weather_frame, text="City", fg='white', bg='black',
                        font=self.normalFont, justify=LEFT)
         self.label_city = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
-                       font=self.normalFont, justify=CENTER)
+                       font=self.normalFont, justify=LEFT)
         self.label_temperature = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
                         font=self.normalFont, justify=LEFT)
         self.label_humidity = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
@@ -58,20 +48,55 @@ class Mirror_GUI():
         self.label_condition.grid(row=5, column=1, sticky=W, pady=2)
 
         # News frame
-        self.news_frame = Frame(self.mirror_gui, borderwidth=5, relief="ridge", width=400,
-                                   height=200, bg='black', highlightbackground="gray")
+        self.news_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=200, height=200, bg='black',
+                                highlightbackground="gray")
+        # Sport area
+        self.label_sport_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
+                                      justify=RIGHT)
+        self.txtarea_sport_news = Text(self.news_frame,  font=self.normalFont, bg='black',
+                                       fg='white', height=5, width=30, borderwidth=0)
 
-        self.mid_frame = Frame(self.mirror_gui, borderwidth=5, relief="ridge", width=1050,
+        # Entertainment area
+        self.label_entert_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
+                                      justify=RIGHT)
+        self.txtarea_entert_news = Text(self.news_frame, font=self.normalFont, bg='black',
+                                       fg='white', height=5, width=30, borderwidth=0)
+
+        # Busisness
+        self.label_business_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
+                                      justify=RIGHT)
+        self.txtarea_business_news = Text(self.news_frame, font=self.normalFont, bg='black',
+                                       fg='white', height=5, width=30, borderwidth=0)
+
+        # technology
+        self.label_tech_news = Label(self.news_frame, text="Loading...", fg='white', bg='black',
+                                         font=self.normalFont,
+                                         justify=RIGHT)
+        self.txtarea_tech_news = Text(self.news_frame, font=self.normalFont, bg='black',
+                                          fg='white', height=5, width=30, borderwidth=0)
+
+
+        self.label_sport_news.grid(row=0, column=1, sticky=W, pady=2)
+        self.txtarea_sport_news.grid(row=1, column=1, sticky=W, pady=2)
+
+        self.label_entert_news.grid(row=2, column=1, sticky=W, pady=2)
+        self.txtarea_entert_news.grid(row=3, column=1, sticky=W, pady=2)
+
+        self.label_business_news.grid(row=4, column=1, sticky=W, pady=2)
+        self.txtarea_business_news.grid(row=5, column=1, sticky=W, pady=2)
+
+        self.label_tech_news.grid(row=6, column=1, sticky=W, pady=2)
+        self.txtarea_tech_news.grid(row=7, column=1, sticky=W, pady=2)
+
+
+        self.mid_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=1000,
                                 height=200, bg='black', highlightbackground="gray")
 
 
         # Frame grids
         self.weather_frame.grid(row=0, column=1, sticky=W, padx=20, pady=20)
-
         self.mid_frame.grid(row=0, column=2, sticky=W, padx=20, pady=20)
         self.news_frame.grid(row=0, column=3, sticky=W, padx=20, pady=20)
-
-
 
     @staticmethod
     def get_weather_data(city, units):
@@ -101,6 +126,27 @@ class Mirror_GUI():
             # showing the error message
             print("Error in the HTTP request")
 
+    @staticmethod
+    def get_news_data(self):
+        news_type = ["sports", "entertainment", "business",
+                     "technology"]
+        apiKey = '0aa18f0aee7a40d18225c0ed63656d68'
+        news = []
+
+        for t in news_type:
+            BASE_URL = f'http://newsapi.org/v2/top-headlines?country=us&category={t}&apiKey=' + apiKey
+            response = requests.get(BASE_URL)
+            if response.status_code == 200:
+                print("Getting news...")
+                data = response.json()
+                news_type = data['articles']
+                news.append(news_type)
+                print(news_type)
+                # for news in news_articles:
+                #     print(news['source']['name'])
+                #     print(news['title'])
+        return news
+
     def update_time(self):
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
@@ -121,10 +167,23 @@ class Mirror_GUI():
         self.label_condition.configure(text=current_cond)
         self.mirror_gui.after(5000000, self.update_weather)
 
-    def update_news_feed(self):
-        pass
+    def update_news(self):
+        news_data = self.get_news_data(self)
 
+        self.label_sport_news.configure(text=news_data[0][0]['source']['name'])
+        self.txtarea_sport_news.insert(END, news_data[0][0]['title'])
 
+        self.label_entert_news.configure(text=news_data[1][0]['source']['name'])
+        self.txtarea_entert_news.insert(END, news_data[1][0]['title'])
+
+        self.label_business_news.configure(text=news_data[2][0]['source']['name'])
+        self.txtarea_business_news.insert(END, news_data[2][0]['title'])
+
+        self.label_tech_news.configure(text=news_data[3][0]['source']['name'])
+        self.txtarea_tech_news.insert(END, news_data[3][0]['title'])
+
+        # print(news['source']['name'])
+        #     print(news['title'])
 
     def display(self):
         self.mirror_gui.mainloop()
@@ -134,6 +193,7 @@ GUI = Mirror_GUI()
 GUI.base_GUI()
 GUI.update_time()
 GUI.update_weather()
+GUI.update_news()
 GUI.display()
 
 
@@ -144,7 +204,14 @@ GUI.display()
 # root.destroy()
 
 
+# news_list = test_news()
+#
+#
+# print(news_list[3][0]['source']['name'])
+# print(news_list[3][0]['title'])
 
+
+# print(news_list)
 
 
 
