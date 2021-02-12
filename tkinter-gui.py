@@ -5,6 +5,10 @@ from tkinter import messagebox
 import requests, json
 import time
 from datetime import datetime
+from tkcalendar import Calendar, DateEntry
+from PIL import ImageTk, Image
+import os
+import pygame
 
 
 class Mirror_GUI():
@@ -18,27 +22,51 @@ class Mirror_GUI():
         self.largeFont = font.Font(family="Times New Roman CE", size=70)
         self.mediumFont = font.Font(family="Times New Roman CE", size=40)
         self.normalFont = font.Font(family="Times New Roman CE", size=20)
+        self.smallFont = font.Font(family="Times New Roman CE", size=15)
         self.mirror_gui.grid_propagate(False)
+        self.date = datetime.now()
+        self.year = self.date.year
+        self.month = self.date.month
+        self.day = self.date.day
+
+        pygame.init()
+        pygame.mixer.init()
+
+        # Declaring track Variable
+        self.track = StringVar()
+        # Declaring Status Variable
+        self.status = StringVar()
 
     def base_GUI(self):
         # Weather frame
         # Time
         self.weather_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=400,
-                                   height=200, bg='black', highlightbackground="gray")
+                                   height=0, bg='black', highlightbackground="gray")
 
         # Weather
         self.label_time = Label(self.weather_frame, text="City", fg='white', bg='black',
-                       font=self.normalFont, justify=LEFT)
+                                font=self.normalFont, justify=LEFT)
         self.label_city = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
-                       font=self.normalFont, justify=LEFT)
+                                font=self.normalFont, justify=LEFT)
         self.label_temperature = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
-                        font=self.normalFont, justify=LEFT)
+                                       font=self.normalFont, justify=LEFT)
         self.label_humidity = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
-                        font=self.normalFont, justify=LEFT)
+                                    font=self.normalFont, justify=LEFT)
         self.label_preassure = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
-                        font=self.normalFont, justify=LEFT)
+                                     font=self.normalFont, justify=LEFT)
         self.label_condition = Label(self.weather_frame, text="Loading...", fg='white', bg='black',
-                        font=self.normalFont, justify=LEFT)
+                                     font=self.normalFont, justify=LEFT)
+
+        # Calendar area
+        self.calendar_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=400,
+                                    height=50, bg='black', highlightbackground="gray")
+        self.cal = Calendar(self.calendar_frame, font=self.smallFont, selectmode='day', locale='en_US', year=self.year,
+                            month=self.month, day=self.day, background="black", disabledbackground="black", bordercolor="black",
+                            headersbackground="black", normalbackground="black", foreground='white',
+                            normalforeground='white', headersforeground='white', selectbackground='black',
+                            weekendbackground='black', othermonthbackground='black', othermonthwebackground='black')
+
+
 
         self.label_city.grid(row=0, column=1, sticky=W, pady=2)
         self.label_time.grid(row=1, column=1, sticky=W, pady=2)
@@ -46,6 +74,7 @@ class Mirror_GUI():
         self.label_humidity.grid(row=3, column=1, sticky=W, pady=2)
         self.label_preassure.grid(row=4, column=1, sticky=W, pady=2)
         self.label_condition.grid(row=5, column=1, sticky=W, pady=2)
+        self.cal.grid(row=0, column=1, sticky=W, pady=2)
 
         # News frame
         self.news_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=200, height=200, bg='black',
@@ -53,27 +82,63 @@ class Mirror_GUI():
         # Sport area
         self.label_sport_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
                                       justify=RIGHT)
-        self.txtarea_sport_news = Text(self.news_frame,  font=self.normalFont, bg='black',
-                                       fg='white', height=5, width=30, borderwidth=0)
+        self.txtarea_sport_news = Text(self.news_frame, font=self.smallFont, bg='black',
+                                       fg='white', height=5, width=40, borderwidth=0)
 
         # Entertainment area
         self.label_entert_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
-                                      justify=RIGHT)
-        self.txtarea_entert_news = Text(self.news_frame, font=self.normalFont, bg='black',
-                                       fg='white', height=5, width=30, borderwidth=0)
+                                       justify=RIGHT)
+        self.txtarea_entert_news = Text(self.news_frame, font=self.smallFont, bg='black',
+                                        fg='white', height=5, width=40, borderwidth=0)
 
         # Busisness
-        self.label_business_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
-                                      justify=RIGHT)
-        self.txtarea_business_news = Text(self.news_frame, font=self.normalFont, bg='black',
-                                       fg='white', height=5, width=30, borderwidth=0)
+        self.label_business_news = Label(self.news_frame, text="Loading...", fg='white', bg='black',
+                                         font=self.normalFont,
+                                         justify=RIGHT)
+        self.txtarea_business_news = Text(self.news_frame, font=self.smallFont, bg='black',
+                                          fg='white', height=5, width=40, borderwidth=0)
 
         # technology
         self.label_tech_news = Label(self.news_frame, text="Loading...", fg='white', bg='black',
-                                         font=self.normalFont,
-                                         justify=RIGHT)
-        self.txtarea_tech_news = Text(self.news_frame, font=self.normalFont, bg='black',
-                                          fg='white', height=5, width=30, borderwidth=0)
+                                     font=self.normalFont,
+                                     justify=RIGHT)
+        self.txtarea_tech_news = Text(self.news_frame, font=self.smallFont, bg='black',
+                                      fg='white', height=5, width=40, borderwidth=0)
+
+        # Player Area
+        trackframe = LabelFrame(self.mirror_gui, text="Song Track", font=self.smallFont, bg="black",
+                                fg="white", bd=5, relief="ridge", borderwidth=1)
+        trackframe.place(x=20, y=400, width=600, height=100)
+
+        # Inserting Song Track Label
+        songtrack = Label(trackframe, textvariable=self.track, width=20, font=self.smallFont,
+                          bg="Gray", fg="white").grid(row=0, column=0, padx=10, pady=5)
+        # # Inserting Status Label
+        trackstatus = Label(trackframe, textvariable=self.status, font=self.smallFont, bg="Gray",
+                            fg="white").grid(row=0, column=1, padx=10, pady=5)
+
+        # Creating Button Frame
+        buttonframe = LabelFrame(self.mirror_gui, text="Control Panel", font=self.smallFont, bg="black",
+                                 fg="white", bd=5, relief="ridge", borderwidth=1)
+        buttonframe.place(x=20, y=500, width=600, height=100)
+
+        # Inserting Play Button
+        playbtn = Button(buttonframe, text="PLAY", command=self.playsong, width=10, height=1,
+                         font=self.smallFont, fg="white", bg="black").grid(row=0, column=0, padx=10,
+                                                                                              pady=5)
+        # Inserting Pause Button
+        playbtn = Button(buttonframe, text="PAUSE", command=self.pausesong, width=8, height=1,
+                         font=self.smallFont, fg="white", bg="black").grid(row=0, column=1, padx=10,
+                                                                                              pady=5)
+        # Inserting Unpause Button
+        playbtn = Button(buttonframe, text="UNPAUSE", command=self.unpausesong, width=10, height=1,
+                         font=self.smallFont, fg="white", bg="black").grid(row=0, column=2, padx=10,
+                                                                                              pady=5)
+        # Inserting Stop Button
+        playbtn = Button(buttonframe, text="STOP", command=self.stopsong, width=10, height=1,
+                         font=self.smallFont, fg="white", bg="black").grid(row=0, column=3, padx=10,
+                                                                                              pady=5)
+
 
 
         self.label_sport_news.grid(row=0, column=1, sticky=W, pady=2)
@@ -88,15 +153,25 @@ class Mirror_GUI():
         self.label_tech_news.grid(row=6, column=1, sticky=W, pady=2)
         self.txtarea_tech_news.grid(row=7, column=1, sticky=W, pady=2)
 
-
-        self.mid_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=1000,
-                                height=200, bg='black', highlightbackground="gray")
-
-
         # Frame grids
-        self.weather_frame.grid(row=0, column=1, sticky=W, padx=20, pady=20)
-        self.mid_frame.grid(row=0, column=2, sticky=W, padx=20, pady=20)
-        self.news_frame.grid(row=0, column=3, sticky=W, padx=20, pady=20)
+        self.weather_frame.place(x=20, y=20)
+        self.calendar_frame.place(x=20, y=700)
+        self.news_frame.place(x=1450, y=20)
+
+    def playsong(self):
+        # Loading Selected Song
+        pygame.mixer.music.load('D:/pink_floyd_w_y_w_h.mp3')
+        # Playing Selected Song
+        pygame.mixer.music.play()
+
+    def pausesong(self):
+        pygame.mixer.music.pause()
+
+    def unpausesong(self):
+        pass
+
+    def stopsong(self):
+        pass
 
     @staticmethod
     def get_weather_data(city, units):
@@ -137,14 +212,9 @@ class Mirror_GUI():
             BASE_URL = f'http://newsapi.org/v2/top-headlines?country=us&category={t}&apiKey=' + apiKey
             response = requests.get(BASE_URL)
             if response.status_code == 200:
-                print("Getting news...")
                 data = response.json()
                 news_type = data['articles']
                 news.append(news_type)
-                print(news_type)
-                # for news in news_articles:
-                #     print(news['source']['name'])
-                #     print(news['title'])
         return news
 
     def update_time(self):
@@ -189,29 +259,40 @@ class Mirror_GUI():
         self.mirror_gui.mainloop()
 
 
+
+
 GUI = Mirror_GUI()
 GUI.base_GUI()
 GUI.update_time()
 GUI.update_weather()
 GUI.update_news()
 GUI.display()
+#
 
 
-# root = tk.Tk()
-# fonts = list(font.families())
-# fonts.sort()
-# print(fonts)
-# root.destroy()
+# f = 'D:/pink_floyd_w_y_w_h.mp3'
+# print(os.path.exists('D://Projects//weather-app//pics//play.png'))
 
+# def pmusic(file):
+#     pygame.init()
+#     pygame.mixer.init()
+#     clock = pygame.time.Clock()
+#     pygame.mixer.music.load(file)
+#     pygame.mixer.music.play()
+#     while pygame.mixer.music.get_busy():
+#         print("Playing...")
+#         clock.tick(1000)
+# pmusic(f)
 
 # news_list = test_news()
-#
-#
 # print(news_list[3][0]['source']['name'])
 # print(news_list[3][0]['title'])
 
 
-# print(news_list)
-
-
-
+# root = tk.Tk()
+# img = tk.PhotoImage(file="D://Projects//weather-app//pics//play.png")
+#
+# label = tk.Label(root, image=img)
+# label.pack()
+#
+# root.mainloop()
