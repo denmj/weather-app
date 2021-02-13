@@ -3,13 +3,13 @@ import tkinter as tk
 from tkinter import font
 from tkinter import messagebox
 import requests, json
+import random
 import time
 from datetime import datetime
 from tkcalendar import Calendar, DateEntry
 from PIL import ImageTk, Image
 import os
 import pygame
-
 
 class Mirror_GUI():
     def __init__(self):
@@ -31,6 +31,7 @@ class Mirror_GUI():
 
         pygame.init()
         pygame.mixer.init()
+        self.playlist = []
 
         # Declaring track Variable
         self.track = StringVar()
@@ -111,7 +112,7 @@ class Mirror_GUI():
         trackframe.place(x=20, y=400, width=600, height=100)
 
         # Inserting Song Track Label
-        songtrack = Label(trackframe, textvariable=self.track, width=20, font=self.smallFont,
+        songtrack = Label(trackframe, textvariable=self.track, width=30, font=self.smallFont,
                           bg="Gray", fg="white").grid(row=0, column=0, padx=10, pady=5)
         # # Inserting Status Label
         trackstatus = Label(trackframe, textvariable=self.status, font=self.smallFont, bg="Gray",
@@ -139,8 +140,6 @@ class Mirror_GUI():
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=3, padx=10,
                                                                                               pady=5)
 
-
-
         self.label_sport_news.grid(row=0, column=1, sticky=W, pady=2)
         self.txtarea_sport_news.grid(row=1, column=1, sticky=W, pady=2)
 
@@ -158,20 +157,43 @@ class Mirror_GUI():
         self.calendar_frame.place(x=20, y=700)
         self.news_frame.place(x=1450, y=20)
 
+        # Load playlist
+        self.load_playlist(self)
+
+    @staticmethod
+    def load_playlist(self):
+        os.chdir("D:/Music")
+        track_list = os.listdir()
+
+        for track in track_list:
+            self.playlist.append(track)
+
     def playsong(self):
+        selected_song = random.choice(self.playlist) 
+        if selected_song.endswith('.mp3'):
+            selected_song_trimmed = selected_song[:-4]
+            self.track.set(selected_song_trimmed)
+        else:
+            self.track.set(selected_song_trimmed)
+            
+        self.status.set("Playing")
         # Loading Selected Song
-        pygame.mixer.music.load('D:/pink_floyd_w_y_w_h.mp3')
+        pygame.mixer.music.load(selected_song)
         # Playing Selected Song
         pygame.mixer.music.play()
 
     def pausesong(self):
+        self.status.set("Pause")
         pygame.mixer.music.pause()
 
     def unpausesong(self):
-        pass
+        self.status.set("Playing")
+        pygame.mixer.music.unpause()
 
     def stopsong(self):
-        pass
+        self.status.set("Stop")
+
+        pygame.mixer.music.stop()
 
     @staticmethod
     def get_weather_data(city, units):
@@ -260,14 +282,13 @@ class Mirror_GUI():
 
 
 
-
 GUI = Mirror_GUI()
 GUI.base_GUI()
 GUI.update_time()
 GUI.update_weather()
-GUI.update_news()
+# GUI.update_news()
 GUI.display()
-#
+
 
 
 # f = 'D:/pink_floyd_w_y_w_h.mp3'
