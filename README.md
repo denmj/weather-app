@@ -1,5 +1,4 @@
-# weather-app
-Simple weather app in python 
+# interactive mirror app
 
 weather_api_key = 3860a5e3975d1317258172dd2623ac4d
 
