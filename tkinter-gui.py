@@ -38,6 +38,7 @@ class Mirror_GUI():
         # Declaring Status Variable
         self.status = StringVar()
 
+    # Base layout of the mirror
     def base_GUI(self):
         # Weather frame
         # Time
@@ -195,6 +196,7 @@ class Mirror_GUI():
 
         pygame.mixer.music.stop()
 
+    # Gets weather data using api key
     @staticmethod
     def get_weather_data(city, units):
         weather_url = "https://api.openweathermap.org/data/2.5/weather?"
