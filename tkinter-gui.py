@@ -10,6 +10,8 @@ from tkcalendar import Calendar, DateEntry
 from PIL import ImageTk, Image
 import os
 import pygame
+from yahoo_fin import stock_info
+
 
 class Mirror_GUI():
     def __init__(self):
@@ -38,6 +40,16 @@ class Mirror_GUI():
         # Declaring Status Variable
         self.status = StringVar()
 
+        # Variables for Stocks
+        self.price_one = StringVar()
+        self.ticker_one = StringVar()
+        self.price_two = StringVar()
+        self.ticker_two = StringVar()
+        self.price_three = StringVar()
+        self.ticker_three = StringVar()
+        self.price_four = StringVar()
+        self.ticker_four = StringVar()
+
     # Base layout of the mirror
     def base_GUI(self):
         # Weather frame
@@ -63,12 +75,11 @@ class Mirror_GUI():
         self.calendar_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=400,
                                     height=50, bg='black', highlightbackground="gray")
         self.cal = Calendar(self.calendar_frame, font=self.smallFont, selectmode='day', locale='en_US', year=self.year,
-                            month=self.month, day=self.day, background="black", disabledbackground="black", bordercolor="black",
+                            month=self.month, day=self.day, background="black", disabledbackground="black",
+                            bordercolor="black",
                             headersbackground="black", normalbackground="black", foreground='white',
                             normalforeground='white', headersforeground='white', selectbackground='black',
                             weekendbackground='black', othermonthbackground='black', othermonthwebackground='black')
-
-
 
         self.label_city.grid(row=0, column=1, sticky=W, pady=2)
         self.label_time.grid(row=1, column=1, sticky=W, pady=2)
@@ -79,7 +90,7 @@ class Mirror_GUI():
         self.cal.grid(row=0, column=1, sticky=W, pady=2)
 
         # News frame
-        self.news_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=200, height=200, bg='black',
+        self.news_frame = Frame(self.mirror_gui, borderwidth=1, relief="ridge", width=200, height=200, bg='black',
                                 highlightbackground="gray")
         # Sport area
         self.label_sport_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
@@ -107,6 +118,34 @@ class Mirror_GUI():
         self.txtarea_tech_news = Text(self.news_frame, font=self.smallFont, bg='black',
                                       fg='white', height=5, width=40, borderwidth=0)
 
+        # Stocks Frame
+        self.stocks_frame = Frame(self.mirror_gui, borderwidth=1, relief="ridge", width=200, height=200, bg='black',
+                                  highlightbackground="gray")
+        # Labels for first stock
+        self.label_ticker_one = Label(self.stocks_frame, textvariable=self.ticker_one, fg='white', bg='black',
+                                      font=self.normalFont, justify=RIGHT)
+        self.label_price_one = Label(self.stocks_frame, textvariable=self.price_one, fg='white', bg='black', font=self.normalFont,
+                                     justify=RIGHT)
+        # Labels for second stock
+        self.label_ticker_two = Label(self.stocks_frame, textvariable=self.ticker_two, fg='white', bg='black',
+                                      font=self.normalFont,
+                                      justify=RIGHT)
+        self.label_price_two = Label(self.stocks_frame, textvariable=self.price_two, fg='white', bg='black', font=self.normalFont,
+                                     justify=RIGHT)
+        # Labels for third stock
+        self.label_ticker_three = Label(self.stocks_frame, textvariable=self.ticker_three, fg='white', bg='black',
+                                        font=self.normalFont,
+                                        justify=RIGHT)
+        self.label_price_three = Label(self.stocks_frame, textvariable=self.price_three, fg='white', bg='black',
+                                       font=self.normalFont,
+                                       justify=RIGHT)
+        # Labels for fourth stock
+        self.label_ticker_four = Label(self.stocks_frame, textvariable=self.ticker_four, fg='white', bg='black',
+                                       font=self.normalFont,
+                                       justify=RIGHT)
+        self.label_price_four = Label(self.stocks_frame, textvariable=self.price_four, fg='white', bg='black',
+                                      font=self.normalFont,
+                                      justify=RIGHT)
         # Player Area
         trackframe = LabelFrame(self.mirror_gui, text="Song Track", font=self.smallFont, bg="black",
                                 fg="white", bd=5, relief="ridge", borderwidth=1)
@@ -127,19 +166,19 @@ class Mirror_GUI():
         # Inserting Play Button
         playbtn = Button(buttonframe, text="PLAY", command=self.playsong, width=10, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=0, padx=10,
-                                                                                              pady=5)
+                                                                           pady=5)
         # Inserting Pause Button
         playbtn = Button(buttonframe, text="PAUSE", command=self.pausesong, width=8, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=1, padx=10,
-                                                                                              pady=5)
+                                                                           pady=5)
         # Inserting Unpause Button
         playbtn = Button(buttonframe, text="UNPAUSE", command=self.unpausesong, width=10, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=2, padx=10,
-                                                                                              pady=5)
+                                                                           pady=5)
         # Inserting Stop Button
         playbtn = Button(buttonframe, text="STOP", command=self.stopsong, width=10, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=3, padx=10,
-                                                                                              pady=5)
+                                                                           pady=5)
 
         self.label_sport_news.grid(row=0, column=1, sticky=W, pady=2)
         self.txtarea_sport_news.grid(row=1, column=1, sticky=W, pady=2)
@@ -153,13 +192,26 @@ class Mirror_GUI():
         self.label_tech_news.grid(row=6, column=1, sticky=W, pady=2)
         self.txtarea_tech_news.grid(row=7, column=1, sticky=W, pady=2)
 
+        self.label_ticker_one.grid(row=0, column=0, sticky=W, pady=2)
+        self.label_price_one.grid(row=0, column=1, sticky=W, pady=2)
+
+        self.label_ticker_two.grid(row=1, column=0, sticky=W, pady=2)
+        self.label_price_two.grid(row=1, column=1, sticky=W, pady=2)
+
+        self.label_ticker_three.grid(row=2, column=0, sticky=W, pady=2)
+        self.label_price_three.grid(row=2, column=1, sticky=W, pady=2)
+
+        self.label_ticker_four.grid(row=3, column=0, sticky=W, pady=2)
+        self.label_price_four.grid(row=3, column=1, sticky=W, pady=2)
+
         # Frame grids
         self.weather_frame.place(x=20, y=20)
         self.calendar_frame.place(x=20, y=700)
         self.news_frame.place(x=1450, y=20)
+        self.stocks_frame.place(x=1450, y=700)
 
         # Load playlist
-        self.load_playlist(self)
+        # self.load_playlist(self)
 
     @staticmethod
     def load_playlist(self):
@@ -170,13 +222,13 @@ class Mirror_GUI():
             self.playlist.append(track)
 
     def playsong(self):
-        selected_song = random.choice(self.playlist) 
+        selected_song = random.choice(self.playlist)
         if selected_song.endswith('.mp3'):
             selected_song_trimmed = selected_song[:-4]
             self.track.set(selected_song_trimmed)
         else:
             self.track.set(selected_song_trimmed)
-            
+
         self.status.set("Playing")
         # Loading Selected Song
         pygame.mixer.music.load(selected_song)
@@ -241,6 +293,26 @@ class Mirror_GUI():
                 news.append(news_type)
         return news
 
+    def get_stock_prices(self):
+        price_one = stock_info.get_live_price('TSLA')
+        price_two = stock_info.get_live_price('AAPL')
+        price_three = stock_info.get_live_price('LTC-USD')
+        price_four = stock_info.get_live_price('NKE')
+        return {'TSLA': round(price_one, 2), 'AAPL': round(price_two, 2), 'LTC-USD': round(price_three, 2),
+                'NKE': round(price_four, 2)}
+
+    def update_stocks(self):
+        stock_dict = self.get_stock_prices()
+        self.price_one.set(stock_dict['TSLA'])
+        self.ticker_one.set("TSLA")
+        self.price_one.set(stock_dict['AAPL'])
+        self.ticker_one.set("AAPL")
+        self.price_one.set(stock_dict['LTC-USD'])
+        self.ticker_one.set("LTC-USD")
+        self.price_one.set(stock_dict['NKE'])
+        self.ticker_one.set("NKE")
+
+
     def update_time(self):
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
@@ -283,15 +355,13 @@ class Mirror_GUI():
         self.mirror_gui.mainloop()
 
 
-
 GUI = Mirror_GUI()
 GUI.base_GUI()
 GUI.update_time()
 GUI.update_weather()
-# GUI.update_news()
+GUI.update_news()
+GUI.update_stocks()
 GUI.display()
-
-
 
 # f = 'D:/pink_floyd_w_y_w_h.mp3'
 # print(os.path.exists('D://Projects//weather-app//pics//play.png'))
