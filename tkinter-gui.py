@@ -13,6 +13,7 @@ import pygame
 from yahoo_fin import stock_info
 
 
+
 class Mirror_GUI():
     def __init__(self):
         self.mirror_gui = Tk()
@@ -34,6 +35,10 @@ class Mirror_GUI():
         pygame.init()
         pygame.mixer.init()
         self.playlist = []
+
+        # pause / upause button text
+        self.pause_unpause_button_text = StringVar()
+        self.pause_unpause_button_text.set("PAUSE")
 
         # Declaring track Variable
         self.track = StringVar()
@@ -152,31 +157,33 @@ class Mirror_GUI():
         trackframe.place(x=20, y=400, width=600, height=100)
 
         # Inserting Song Track Label
-        songtrack = Label(trackframe, textvariable=self.track, width=30, font=self.smallFont,
+        self.songtrack = Label(trackframe, textvariable=self.track, width=30, font=self.smallFont,
                           bg="Gray", fg="white").grid(row=0, column=0, padx=10, pady=5)
         # # Inserting Status Label
-        trackstatus = Label(trackframe, textvariable=self.status, font=self.smallFont, bg="Gray",
+        self.trackstatus = Label(trackframe, textvariable=self.status, font=self.smallFont, bg="Gray",
                             fg="white").grid(row=0, column=1, padx=10, pady=5)
 
         # Creating Button Frame
-        buttonframe = LabelFrame(self.mirror_gui, text="Control Panel", font=self.smallFont, bg="black",
+        self.buttonframe = LabelFrame(self.mirror_gui, text="Control Panel", font=self.smallFont, bg="black",
                                  fg="white", bd=5, relief="ridge", borderwidth=1)
-        buttonframe.place(x=20, y=500, width=600, height=100)
+        self.buttonframe.place(x=20, y=500, width=600, height=100)
+
 
         # Inserting Play Button
-        playbtn = Button(buttonframe, text="PLAY", command=self.playsong, width=10, height=1,
+        self.playbtn = Button(self.buttonframe, text="SHUFFLE", command=self.playsong, width=10, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=0, padx=10,
                                                                            pady=5)
         # Inserting Pause Button
-        playbtn = Button(buttonframe, text="PAUSE", command=self.pausesong, width=8, height=1,
+        self.pausebtn = Button(self.buttonframe, textvariable=self.pause_unpause_button_text, command=self.pausesong, width=8, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=1, padx=10,
-                                                                           pady=5)
-        # Inserting Unpause Button
-        playbtn = Button(buttonframe, text="UNPAUSE", command=self.unpausesong, width=10, height=1,
+
+        # Inserting skip Button
+        self.skifrwdbtn = Button(self.buttonframe, text="SKIP", command=self.skipsong, width=10, height=1,
+
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=2, padx=10,
                                                                            pady=5)
         # Inserting Stop Button
-        playbtn = Button(buttonframe, text="STOP", command=self.stopsong, width=10, height=1,
+        self.stopbtn = Button(self.buttonframe, text="STOP", command=self.stopsong, width=10, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=3, padx=10,
                                                                            pady=5)
 
@@ -222,31 +229,53 @@ class Mirror_GUI():
             self.playlist.append(track)
 
     def playsong(self):
-        selected_song = random.choice(self.playlist)
-        if selected_song.endswith('.mp3'):
-            selected_song_trimmed = selected_song[:-4]
-            self.track.set(selected_song_trimmed)
-        else:
-            self.track.set(selected_song_trimmed)
 
-        self.status.set("Playing")
-        # Loading Selected Song
-        pygame.mixer.music.load(selected_song)
-        # Playing Selected Song
-        pygame.mixer.music.play()
+        while len(self.playlist) != 0:
+
+            selected_song = random.choice(self.playlist)
+            self.playlist.remove(selected_song)
+            if selected_song.endswith('.mp3'):
+                selected_song_trimmed = selected_song[:-4]
+                self.track.set(selected_song_trimmed)
+            else:
+                self.track.set(selected_song_trimmed)
+
+            self.status.set("Playing")
+            # Loading Selected Song
+            pygame.mixer.music.load(selected_song)
+            # Playing Selected Song
+            pygame.mixer.music.play()
+
+        self.load_playlist(self)
 
     def pausesong(self):
-        self.status.set("Pause")
-        pygame.mixer.music.pause()
+
+        if self.status.get() == 'Playing':
+            pygame.mixer.music.pause()
+            self.status.set("Pause")
+            self.pause_unpause_button_text.set("PLAY")
+
+        elif self.status.get() == 'Pause':
+            pygame.mixer.music.unpause()
+            self.status.set("Playing")
+            self.pause_unpause_button_text.set("PAUSE")
+
 
     def unpausesong(self):
         self.status.set("Playing")
         pygame.mixer.music.unpause()
 
+    def skipsong(self):
+        pass
+
     def stopsong(self):
         self.status.set("Stop")
-
         pygame.mixer.music.stop()
+
+        # Reload playlist
+        self.load_playlist(self)
+
+
 
     # Gets weather data using api key
     @staticmethod
