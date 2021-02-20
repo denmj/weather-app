@@ -95,7 +95,7 @@ class Mirror_GUI():
         self.cal.grid(row=0, column=1, sticky=W, pady=2)
 
         # News frame
-        self.news_frame = Frame(self.mirror_gui, borderwidth=1, relief="ridge", width=200, height=200, bg='black',
+        self.news_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=200, height=200, bg='black',
                                 highlightbackground="gray")
         # Sport area
         self.label_sport_news = Label(self.news_frame, text="Loading...", fg='white', bg='black', font=self.normalFont,
@@ -124,7 +124,7 @@ class Mirror_GUI():
                                       fg='white', height=5, width=40, borderwidth=0)
 
         # Stocks Frame
-        self.stocks_frame = Frame(self.mirror_gui, borderwidth=1, relief="ridge", width=200, height=200, bg='black',
+        self.stocks_frame = Frame(self.mirror_gui, borderwidth=0, relief="ridge", width=200, height=200, bg='black',
                                   highlightbackground="gray")
         # Labels for first stock
         self.label_ticker_one = Label(self.stocks_frame, textvariable=self.ticker_one, fg='white', bg='black',
@@ -176,6 +176,7 @@ class Mirror_GUI():
         # Inserting Pause Button
         self.pausebtn = Button(self.buttonframe, textvariable=self.pause_unpause_button_text, command=self.pausesong, width=8, height=1,
                          font=self.smallFont, fg="white", bg="black").grid(row=0, column=1, padx=10,
+                                                                           pady=5)
 
         # Inserting skip Button
         self.skifrwdbtn = Button(self.buttonframe, text="SKIP", command=self.skipsong, width=10, height=1,
@@ -200,16 +201,16 @@ class Mirror_GUI():
         self.txtarea_tech_news.grid(row=7, column=1, sticky=W, pady=2)
 
         self.label_ticker_one.grid(row=0, column=0, sticky=W, pady=2)
-        self.label_price_one.grid(row=0, column=1, sticky=W, pady=2)
+        self.label_price_one.grid(row=0, column=3, sticky=W, pady=2)
 
         self.label_ticker_two.grid(row=1, column=0, sticky=W, pady=2)
-        self.label_price_two.grid(row=1, column=1, sticky=W, pady=2)
+        self.label_price_two.grid(row=1, column=3, sticky=W, pady=2)
 
         self.label_ticker_three.grid(row=2, column=0, sticky=W, pady=2)
-        self.label_price_three.grid(row=2, column=1, sticky=W, pady=2)
+        self.label_price_three.grid(row=2, column=3, sticky=W, pady=2)
 
         self.label_ticker_four.grid(row=3, column=0, sticky=W, pady=2)
-        self.label_price_four.grid(row=3, column=1, sticky=W, pady=2)
+        self.label_price_four.grid(row=3, column=3, sticky=W, pady=2)
 
         # Frame grids
         self.weather_frame.place(x=20, y=20)
@@ -333,13 +334,13 @@ class Mirror_GUI():
     def update_stocks(self):
         stock_dict = self.get_stock_prices()
         self.price_one.set(stock_dict['TSLA'])
-        self.ticker_one.set("TSLA")
-        self.price_one.set(stock_dict['AAPL'])
-        self.ticker_one.set("AAPL")
-        self.price_one.set(stock_dict['LTC-USD'])
-        self.ticker_one.set("LTC-USD")
-        self.price_one.set(stock_dict['NKE'])
-        self.ticker_one.set("NKE")
+        self.ticker_one.set("TSLA: ")
+        self.price_two.set(stock_dict['AAPL'])
+        self.ticker_two.set("AAPL: ")
+        self.price_three.set(stock_dict['LTC-USD'])
+        self.ticker_three.set("LTC-USD: ")
+        self.price_four.set(stock_dict['NKE'])
+        self.ticker_four.set("NKE: ")
 
 
     def update_time(self):
