@@ -2,3 +2,4 @@ tkcalendar == 1.6.1
 pygame == 2.0.1
 Pillow == 8.1.0
 yahoo-fin == 0.8.7
+pyodbc == 4.0.30
