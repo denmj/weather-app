@@ -11,6 +11,7 @@ from PIL import ImageTk, Image
 import os
 import pygame
 from yahoo_fin import stock_info
+import Helpers
 
 
 
@@ -285,6 +286,12 @@ class Mirror_GUI():
         weather_api = "3860a5e3975d1317258172dd2623ac4d"
         url = weather_url + "q=" + city + "&units=" + units + "&appid=" + weather_api
         response = requests.get(url)
+
+        # Loading data into SQL DataWarehouse -> WeatherDW
+        response_json = response.json()
+        one_dim_dict = Helpers.parse_weather_data(response_json)
+        Helpers.load_weather_to_SQL(one_dim_dict)
+
         if response.status_code == 200:
             print("Getting weather data...")
             data = response.json()
@@ -351,6 +358,7 @@ class Mirror_GUI():
         self.mirror_gui.after(1000, self.update_time)
 
     def update_weather(self):
+        
         city, temp, hum, pres, cond = self.get_weather_data("Chicago", "metric")
         current_temp = "Temperature: " + str(temp) + " °C"
         current_hum = "Humudity: " + str(hum)
@@ -361,7 +369,7 @@ class Mirror_GUI():
         self.label_humidity.configure(text=current_hum)
         self.label_preassure.configure(text=current_press)
         self.label_condition.configure(text=current_cond)
-        self.mirror_gui.after(5000000, self.update_weather)
+        self.mirror_gui.after(600000, self.update_weather)
 
     def update_news(self):
         news_data = self.get_news_data(self)
